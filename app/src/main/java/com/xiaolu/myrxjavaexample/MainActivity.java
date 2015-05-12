@@ -6,6 +6,7 @@ import android.util.Log;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action1;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -16,21 +17,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Observable<String> myObservable = Observable.create(
-                new Observable.OnSubscribe<String>() {
-                    @Override
-                    public void call(Subscriber<? super String> sub) {
-                        sub.onNext("Hello, world!");
-                        sub.onCompleted();
-                    }
-                }
-        );
+        Observable<String> myObservable = Observable.just("Hello, world!");
 
         /**
          * When the subscription is made, myObservable calls the subscriber's onNext() and
          * onComplete() methods. As a result, mySubscriber outputs "Hello, world!" then terminates.
          */
-        myObservable.subscribe(mySubscriber);
+        myObservable.subscribe(onNextAction);
     }
 
     Subscriber<String> mySubscriber = new Subscriber<String>() {
@@ -46,5 +39,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onError(Throwable e) { }
+    };
+
+    Action1<String> onNextAction = new Action1<String>() {
+        @Override
+        public void call(String s) {
+            Log.w(TAG, s);
+        }
     };
 }
