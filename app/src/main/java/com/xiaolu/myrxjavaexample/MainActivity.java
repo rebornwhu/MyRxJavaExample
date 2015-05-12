@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         myObservable.subscribe(onNextAction);
     }
 
+
     Subscriber<String> mySubscriber = new Subscriber<String>() {
         @Override
         public void onNext(String s) {
@@ -41,10 +42,11 @@ public class MainActivity extends AppCompatActivity {
         public void onError(Throwable e) { }
     };
 
+
     Action1<String> onNextAction = new Action1<String>() {
         @Override
         public void call(String s) {
-            Log.w(TAG, s);
+            Log.w(TAG, s + " -Shawn");
         }
     };
 }
