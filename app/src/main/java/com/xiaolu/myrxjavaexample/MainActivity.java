@@ -19,16 +19,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Observable.just("Hello, world!")
-                .map(new Func1<String, String>() {
+                // Func1<T1, R> T1 represents the input type, R represents the return type
+                // here T1 is String - "Hello Word", R - Integer
+                .map(new Func1<String, Integer>() {
                     @Override
-                    public String call(String s) {
-                        return s + " -Shawn";
+                    // Same here, return type is Integer which is the same as R in Func1<>
+                    public Integer call(String s) {
+                        return s.hashCode();
                     }
                 })
-                .subscribe(new Action1<String>() {
+                .subscribe(new Action1<Integer>() {
                     @Override
-                    public void call(String s) {
-                        Log.w(TAG, s);
+                    public void call(Integer s) {
+                        Log.w(TAG, Integer.toString(s));
                     }
                 });
     }
