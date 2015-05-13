@@ -1,16 +1,26 @@
 package com.xiaolu.myrxjavaexample;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ImageView;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -18,14 +28,19 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> urls = new ArrayList<>();
 
+    @InjectView(R.id.imageView)
+    ImageView imgView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.inject(this);
 
         // article1Example();
         // article2Example();
-        article3Example();
+        // article3Example();
+        concurrencyExample("Hello, world!");
     }
 
     private void article1Example() {
@@ -135,6 +150,40 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private void concurrencyExample(String url) {
+        retrieveImage(url)
+                .subscribeOn(Schedulers.newThread())
+                // Don't ever use "Thread.sleep()" in the method
+                .delay(3000, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Bitmap>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(Bitmap bitmap) {
+                        imgView.setImageBitmap(bitmap);
+                    }
+                });
+    }
+
+    Observable<Bitmap> retrieveImage(String url) {
+        InputStream is;
+        try {
+            is = getAssets().open("baobi.png");
+            return Observable.just(BitmapFactory.decodeStream(is));
+        }
+        catch (IOException e) { }
+
+        return null;
+    }
 
     // This method mimic an API call
     Observable<ArrayList<String>> query(String s) {
