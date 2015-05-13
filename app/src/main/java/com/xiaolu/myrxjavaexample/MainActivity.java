@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
@@ -22,6 +23,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // article1Example();
+        // article2Example();
+        article3Example();
+    }
+
+    private void article1Example() {
         /**
          * First article
          */
@@ -41,14 +48,16 @@ public class MainActivity extends AppCompatActivity {
                         return i.toString();
                     }
                 })
-                // When susbscribe, we can see the return type is String
+                        // When susbscribe, we can see the return type is String
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
                         Log.w(TAG, s);
                     }
                 });
+    }
 
+    private void article2Example() {
         /**
          * Second article
          */
@@ -79,6 +88,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .take(3)
+                .doOnNext(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        Log.w(TAG, s + " is saved");
+                    }
+                })
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
@@ -86,6 +101,40 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void article3Example() {
+        Observable.just("Hello, world!")
+                .map(new Func1<String, String>() {
+                    @Override
+                    public String call(String s) {
+                        /*throw new NullPointerException("This is exception 1");*/
+                        return s + " mutation 1 ";
+                    }
+                })
+                .map(new Func1<String, String>() {
+                    @Override
+                    public String call(String s) {
+                        throw new NullPointerException("This is exception 2");
+                    }
+                })
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.w(TAG, "task finish");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        Log.w(TAG, s);
+                    }
+                });
+    }
+
 
     // This method mimic an API call
     Observable<ArrayList<String>> query(String s) {
