@@ -69,6 +69,12 @@ public class MainActivity extends AppCompatActivity {
                         return getTitle(url);
                     }
                 })
+                .filter(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(String s) {
+                        return s != null;
+                    }
+                })
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
@@ -91,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         else if (url.equals("url1"))
             result = "2 Fast 2 Furious";
         else
-            result = "Fast 7";
+            result = null;
         return Observable.just(result);
     }
 }
