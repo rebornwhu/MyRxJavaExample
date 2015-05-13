@@ -55,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
         urls.add("url1");
         urls.add("url2");
         urls.add("url3");
+        urls.add("url4");
+        urls.add("url5");
+        urls.add("url6");
 
         query("Hello, world!")
                 .flatMap(new Func1<List<String>, Observable<String>>() {
@@ -75,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                         return s != null;
                     }
                 })
+                .take(3)
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
@@ -96,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
             result = "Do or die";
         else if (url.equals("url1"))
             result = "2 Fast 2 Furious";
+        else if (url.equals("url2"))
+            result = "Harry Potter";
+        else if (url.equals("url5"))
+            result = "5 Monkeys";
+        else if (url.equals("url4"))
+            result = "Fantastic 4";
         else
             result = null;
         return Observable.just(result);
