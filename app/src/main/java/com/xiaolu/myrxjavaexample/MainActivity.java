@@ -13,13 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func0;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 
@@ -28,19 +30,58 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> urls = new ArrayList<>();
 
-    @InjectView(R.id.imageView)
-    ImageView imgView;
+    @Bind(R.id.imageView) ImageView imgView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         // article1Example();
         // article2Example();
         // article3Example();
-        concurrencyExample("Hello, world!");
+        // concurrencyExample("Hello, world!");
+
+        /* This experiment show that 2 observables even the first one throw error the second
+        * one will always be executed fully */
+        Observable<Boolean> o1 = Observable.defer(new Func0<Observable<Boolean>>() {
+            @Override
+            public Observable<Boolean> call() {
+                return doSomething1();
+            }
+        });
+
+        Observable<Boolean> o2 = Observable.defer(new Func0<Observable<Boolean>>() {
+            @Override
+            public Observable<Boolean> call() {
+                return doSomething2();
+            }
+        });
+
+        Observable.combineLatest(o1, o2, new Func2<Boolean, Boolean, Boolean>() {
+            @Override
+            public Boolean call(Boolean aBoolean, Boolean aBoolean2) {
+                return aBoolean && aBoolean2;
+            }
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: ", e.getCause());
+                    }
+
+                    @Override
+                    public void onNext(Boolean aBoolean) {
+                        Log.i(TAG, "onNext: Pass");
+                    }
+                });
     }
 
     private void article1Example() {
@@ -207,5 +248,17 @@ public class MainActivity extends AppCompatActivity {
         else
             result = null;
         return Observable.just(result);
+    }
+
+    /********************************************
+     * Error in one of combineLatest observable *
+     ********************************************/
+    private Observable<Boolean> doSomething1() {
+        throw new NullPointerException("some exception");
+    }
+
+    private Observable<Boolean> doSomething2() {
+        Log.i(TAG, "doSomething2: successfully executed");
+        return Observable.just(true);
     }
 }
